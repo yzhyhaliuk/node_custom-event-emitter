@@ -7,10 +7,10 @@ class MyEventEmitter {
 
   on(event, listener) {
     if (!this.events[event]) {
-      this.events[event] = { regular: [], prepended: [] };
+      this.events[event] = [];
     }
 
-    this.events[event].regular.push(listener);
+    this.events[event].push(listener);
   }
   once(event, listener) {
     const onceWrapper = (...args) => {
@@ -25,30 +25,22 @@ class MyEventEmitter {
       return;
     }
 
-    const index1 = this.events[event].regular.indexOf(listener);
-    const index2 = this.events[event].prepended.indexOf(listener);
-
-    if (index1 !== -1) {
-      this.events[event].regular.splice(index1, 1);
-    }
-
-    if (index2 !== -1) {
-      this.events[event].prepended.splice(index2, 1);
-    }
+    this.events[event] = this.events[event].filter(
+      (lstnr) => lstnr !== listener,
+    );
   }
   emit(event, ...args) {
     if (!this.events[event]) {
       return;
     }
-    this.events[event].prepended.forEach((lstnr) => lstnr(...args));
-    this.events[event].regular.forEach((lstnr) => lstnr(...args));
+    this.events[event].forEach((lstnr) => lstnr(...args));
   }
   prependListener(event, listener) {
     if (!this.events[event]) {
       this.events[event] = [];
     }
 
-    this.events[event].prepended.push(listener);
+    this.events[event].unshift(listener);
   }
   prependOnceListener(event, listener) {
     const onceWrapper = (...args) => {
@@ -66,9 +58,7 @@ class MyEventEmitter {
     }
   }
   listenerCount(event) {
-    return this.events[event]
-      ? this.events[event].regular.length + this.events[event].prepended.length
-      : 0;
+    return this.events[event] ? this.events[event].length : 0;
   }
 }
 
